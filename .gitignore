@@ -1,3 +1,5 @@
 config.env
 /playlists/*
 .cache-*
+.DS_Store
+._*
