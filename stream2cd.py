@@ -19,12 +19,9 @@ def sanitize_folder_name(name):
     return "".join(c for c in name if c.isalnum() or c in (" ", "-", "_")).strip()
 
 blackhole_id = "BlackHole 2ch"
-# blackhole_id = "blackhole+headphones"
-# Replace with your values
 client_id = os.environ.get('SPOTIPY_CLIENT_ID')
-print(client_id)
 client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
-redirect_uri = 'http://localhost:8888/callback/'
+redirect_uri = os.environ.get('SPOTIPY_REDIRECT_URI')
 username = os.environ.get('SPOTIPY_USERNAME')
 playlist_id = os.environ.get('PLAYLIST_ID')
 
