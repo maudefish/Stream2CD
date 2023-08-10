@@ -2,6 +2,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
 import os #to interface with blackhole
+import sys
 import subprocess
 import time
 
@@ -44,8 +45,8 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=client_id,
                                                username=username))
 
 # say hi
-user_profile = sp.user(user_id=username_id)
-display_name = user_profile['display_name']
+user_info = sp.current_user()
+display_name = user_info['display_name']
 print(f'Display Name: {display_name}')
 
 # Get playlist tracks
@@ -79,6 +80,9 @@ if playback_info:
     print(f"original Spotify volume is {volume_percent}%")
 else:
     print("No active device found")
+    error_message = "ERROR: Try pressing play on your Spotify app and running the code again."
+    print(error_message)
+    sys.exit(1)  
 
 # Get the current output device
 current_device = subprocess.check_output(['SwitchAudioSource', '-c']).decode().strip()
@@ -93,10 +97,9 @@ os.system(f'SwitchAudioSource -s "{blackhole_id}"')
 new_device = subprocess.check_output(['SwitchAudioSource', '-c']).decode().strip()
 print(f"new device is {new_device}")
 
-print(f"setting system volume to 100%")
-set_volume(100)
+print(f"setting system volume to 75%")
+set_volume(95)
 print(f"setting Spotify volume to 100%")
-set_volume(100)
 
 devices = sp.devices()
 device_id = devices['devices'][0]['id'] # Assuming the first device is the one you want
