@@ -69,24 +69,26 @@ else:
 # get current volume
 if playback_info:
     volume_percent = playback_info['device']['volume_percent']
-    print(f"Current volume is {volume_percent}%")
+    print(f"original Spotify volume is {volume_percent}%")
 else:
     print("No active device found")
 
 # Get the current output device
 current_device = subprocess.check_output(['SwitchAudioSource', '-c']).decode().strip()
-print(f"current device is {current_device}")
+print(f"original device is {current_device}")
 
 original_volume = get_volume()
-print(f"Original volume is {original_volume}%")
+print(f"Original system volume is {original_volume}%")
 
 # Set the output device to BlackHole
 print(f"switching...")
 os.system(f'SwitchAudioSource -s "{blackhole_id}"')
 new_device = subprocess.check_output(['SwitchAudioSource', '-c']).decode().strip()
-print(f"current device is {new_device}")
+print(f"new device is {new_device}")
 
-print(f"setting volume to {original_volume}%")
+print(f"setting system volume to 100%")
+set_volume(100)
+print(f"setting Spotify volume to 100%")
 set_volume(100)
 
 devices = sp.devices()
@@ -117,10 +119,11 @@ for index, item in enumerate(tracks):
 
 # Set the volume back
 print(f"switching back...")
+print(f"setting Spotify volume to 100%")
 sp.volume(volume_percent)
 
 # Set the output device to BlackHole
 os.system('SwitchAudioSource -s ' + "'" + current_device + "'")
 print(f"current device is {current_device}")
-print(f"setting volume back to {original_volume}%")
+print(f"setting system volume back to {original_volume}%")
 set_volume(original_volume)
