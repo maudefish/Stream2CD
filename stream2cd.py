@@ -9,6 +9,13 @@ current_dir = os.getcwd()
 
 load_dotenv(dotenv_path='./config.env')
 
+def get_volume():
+    return int(subprocess.getoutput('osascript -e "output volume of (get volume settings)"'))
+
+def set_volume(level):
+    command = "osascript -e 'set volume output volume {}'".format(level)
+    subprocess.run(command, shell=True)
+
 def sanitize_filename(filename):
     invalid_characters = '<>:"/\\|?*'
     for char in invalid_characters:
@@ -19,9 +26,12 @@ def sanitize_folder_name(name):
     return "".join(c for c in name if c.isalnum() or c in (" ", "-", "_")).strip()
 
 blackhole_id = "BlackHole 2ch"
+# blackhole_id = "blackhole+headphones"
+# Replace with your values
 client_id = os.environ.get('SPOTIPY_CLIENT_ID')
+print(client_id)
 client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
-redirect_uri = os.environ.get('SPOTIPY_REDIRECT_URI')
+redirect_uri = 'http://localhost:8888/callback/'
 username = os.environ.get('SPOTIPY_USERNAME')
 playlist_id = os.environ.get('PLAYLIST_ID')
 
@@ -67,11 +77,17 @@ else:
 current_device = subprocess.check_output(['SwitchAudioSource', '-c']).decode().strip()
 print(f"current device is {current_device}")
 
+original_volume = get_volume()
+print(f"Original volume is {original_volume}%")
+
 # Set the output device to BlackHole
 print(f"switching...")
 os.system(f'SwitchAudioSource -s "{blackhole_id}"')
 new_device = subprocess.check_output(['SwitchAudioSource', '-c']).decode().strip()
 print(f"current device is {new_device}")
+
+print(f"setting volume to {original_volume}%")
+set_volume(100)
 
 devices = sp.devices()
 device_id = devices['devices'][0]['id'] # Assuming the first device is the one you want
@@ -106,3 +122,5 @@ sp.volume(volume_percent)
 # Set the output device to BlackHole
 os.system('SwitchAudioSource -s ' + "'" + current_device + "'")
 print(f"current device is {current_device}")
+print(f"setting volume back to {original_volume}%")
+set_volume(original_volume)
