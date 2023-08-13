@@ -1,0 +1,17 @@
+from flask import Flask, request, redirect
+import json
+
+# ... rest of the Flask setup ...
+
+@app.route('/callback/')
+def callback():
+    # ... authentication logic ...
+
+    # Save the access token and playlist ID to a file
+    with open('auth_info.json', 'w') as f:
+        json.dump({'access_token': access_token, 'playlist_id': playlist_id}, f)
+
+    return "Logged in successfully. You can now run the main script."
+
+if __name__ == '__main__':
+    app.run(port=8888, debug=True)

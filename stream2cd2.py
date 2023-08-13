@@ -5,49 +5,33 @@ import os #to interface with blackhole
 import sys
 import subprocess
 import time
+from flask import Flask, request, redirect
+import json
+
 
 current_dir = os.getcwd()
 
 load_dotenv(dotenv_path='./config.env')
 
-# helper functions
+
 def print_intro():
     intro = """                                                                                         
 
-  ░██████╗████████╗██████╗░███████╗░█████╗░███╗░░░███╗██████╗░░█████╗░██████╗░
-  ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██╔══██╗████╗░████║╚════██╗██╔══██╗██╔══██╗
-  ╚█████╗░░░░██║░░░██████╔╝█████╗░░███████║██╔████╔██║░░███╔═╝██║░░╚═╝██║░░██║
-  ░╚═══██╗░░░██║░░░██╔══██╗██╔══╝░░██╔══██║██║╚██╔╝██║██╔══╝░░██║░░██╗██║░░██║
-  ██████╔╝░░░██║░░░██║░░██║███████╗██║░░██║██║░╚═╝░██║███████╗╚█████╔╝██████╔╝
-  ╚═════╝░░░░╚═╝░░░╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝╚═╝░░░░░╚═╝╚══════╝░╚════╝░╚═════╝░
-                                                
-                                    by Kevin Rodriguez (github.com/maudefish)
+ \033[38;5;57m ░██████╗████████╗██████╗░███████╗░█████╗░███╗░░░███╗██████╗░░█████╗░██████╗░
+ \033[38;5;56m ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██╔══██╗████╗░████║╚════██╗██╔══██╗██╔══██╗
+ \033[38;5;55m ╚█████╗░░░░██║░░░██████╔╝█████╗░░███████║██╔████╔██║░░███╔═╝██║░░╚═╝██║░░██║
+ \033[38;5;54m ░╚═══██╗░░░██║░░░██╔══██╗██╔══╝░░██╔══██║██║╚██╔╝██║██╔══╝░░██║░░██╗██║░░██║
+ \033[38;5;53m ██████╔╝░░░██║░░░██║░░██║███████╗██║░░██║██║░╚═╝░██║███████╗╚█████╔╝██████╔╝
+ \033[38;5;52m ╚═════╝░░░░╚═╝░░░╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝╚═╝░░░░░╚═╝╚══════╝░╚════╝░╚═════╝░\033[0m
+
+                                        by \033[38;5;52mKevin Rodriguez\033[0m \033[38;5;23;4mgithub.com/maudefish\033[0m
+
     """
     print(intro)
 
-def print_intro2():
-    intro = """                                                                                                                                                                             _..._                 
+print_intro()
 
-                                                                     .-''-.      .-'_..._''._______       
-                             __.....__             __  __   ___    .' .-.  )   .' .'      '.\  ___ `'.    
-                         .-''         '.          |  |/  `.'   `. / .'  / /   / .'           ' |--.\  \   
-             .| .-,.--. /     .-''"'-.  `.        |   .-.  .-.   (_/   / /   . '             | |    \  '  
-           .' |_|  .-. /     /________\   \   __  |  |  |  |  |  |    / /    | |             | |     |  ' 
-       _ .'     | |  | |                  |.:--.'.|  |  |  |  |  |   / /     | |             | |     |  | 
-     .' '--.  .-| |  | \    .-------------/ |   \ |  |  |  |  |  |  . '      . '             | |     ' .' 
-    .   | /|  | | |  '- \    '-.____...---`" __ | |  |  |  |  |  | / /    _.-'\ '.          .| |___.' /'  
-  .'.'| |//|  | | |      `.             .' .'.''| |__|  |__|  |__.' '  _.'.-'' '. `._____.-'/_______.'/   
-.'.'.-'  / |  '.| |        `''-...... -'  / /   | |_            /  /.-'_.'       `-.______ /\_______|/    
-.'   \_.'  |   /|_|                       \ \._,\ '/           /    _.'                   `               
-           `'-'                            `--'  `"           ( _.-'                                      
-                                                                                                          
-                                                                                                                                                          
-                                    by Kevin Rodriguez (github.com/maudefish)
-    """
-    print(intro)    
-
-print_intro2()
-
+# helper functions
 def get_volume():
     return int(subprocess.getoutput('osascript -e "output volume of (get volume settings)"'))
 
@@ -70,27 +54,28 @@ blackhole_id = "BlackHole 2ch"
 client_id = os.environ.get('SPOTIPY_CLIENT_ID')
 client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
 redirect_uri = 'http://localhost:8888/callback/'
-username = os.environ.get('SPOTIPY_USERNAME')
-playlist_id = os.environ.get('PLAYLIST_ID')
+# username = os.environ.get('SPOTIPY_USERNAME')
+# playlist_id = os.environ.get('PLAYLIST_ID')
 
-if not playlist_id:
-    playlist_url = input("Please enter the full link of the playlist: ")
-    # Assuming the playlist URL is something like "https://open.spotify.com/playlist/1a2B3c4D5e6F7g8H9i"
-    # Extracting the playlist ID by splitting the URL by "/" and taking the last part
-    playlist_id = playlist_url.split("/")[-1].split("?")[0]
+# if not playlist_id:
+#     playlist_url = input("Please enter the full link of the playlist: ")
+#     # Assuming the playlist URL is something like "https://open.spotify.com/playlist/1a2B3c4D5e6F7g8H9i"
+#     # Extracting the playlist ID by splitting the URL by "/" and taking the last part
+#     playlist_id = playlist_url.split("/")[-1].split("?")[0]
+# Read the access token and playlist ID from the file
+with open('auth_info.json', 'r') as f:
+    auth_info = json.load(f)
 
-# Authenticate
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=client_id,
-                                               client_secret=client_secret,
-                                               redirect_uri=redirect_uri,
-                                               scope='playlist-modify-public playlist-modify-private playlist-read-private user-read-playback-state user-modify-playback-state app-remote-control',
-                                               username=username))
+access_token = auth_info['access_token']
+playlist_id = auth_info['playlist_id']
+
+sp = spotipy.Spotify(auth=access_token)
+
 
 # say hi
 user_info = sp.current_user()
 display_name = user_info['display_name']
 print(f'Display Name: {display_name}')
-
 print(f"Playlist ID: {playlist_id}")
 
 # Get playlist tracks
